@@ -1,0 +1,858 @@
+/* ============================================
+   BLINKENLIGHTS - Retro Computer LED Display
+   ============================================ */
+
+:root {
+    /* Base pixel unit - all computer art scales from this */
+    --px: 4px;
+
+    /* Pastel background palette */
+    --bg-primary: #f7f3ee;
+    --bg-secondary: #ede7df;
+    --bg-card: #ffffff;
+    --border: #e0dbd4;
+    --text-primary: #2d2a26;
+    --text-muted: #8a8480;
+    --accent: #d4956a;
+
+    /* C64 colors */
+    --c64-beige: #b8a88a;
+    --c64-beige-light: #c8b89a;
+    --c64-beige-dark: #9e8e70;
+    --c64-brown-keys: #6b5b47;
+    --c64-brown-key-face: #7a6a56;
+    --c64-blue-screen: #4040e0;
+    --c64-blue-text: #a0a0ff;
+    --c64-monitor-body: #c8bea8;
+    --c64-monitor-bezel: #8a8070;
+
+    /* 1541 colors */
+    --1541-beige: #c0b098;
+    --1541-front: #a09080;
+
+    /* Amiga colors */
+    --amiga-beige: #c8bea8;
+    --amiga-beige-light: #d4ccb8;
+    --amiga-beige-dark: #b0a890;
+    --amiga-key-face: #c0b8a0;
+    --amiga-screen-blue: #0055aa;
+    --amiga-wb-title: #ff8800;
+    --amiga-monitor-body: #c8c0b0;
+
+    /* Spectrum colors */
+    --spec-black: #1a1a1a;
+    --spec-dark: #2d2d2d;
+    --spec-rubber: #383838;
+    --spec-rubber-face: #404040;
+    --spec-screen-white: #d0d0d0;
+    --spec-tv-body: #6a6050;
+    --spec-tv-bezel: #4a4038;
+
+    /* LED colors */
+    --led-red: #ff2020;
+    --led-green: #20e040;
+    --led-orange: #ffa020;
+    --led-off-red: #4a1010;
+    --led-off-green: #0a3a10;
+    --led-off-orange: #4a3010;
+}
+
+/* ============================================
+   RESET & BASE
+   ============================================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    image-rendering: pixelated;
+}
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    padding: 2rem 1rem;
+}
+
+/* ============================================
+   HEADER
+   ============================================ */
+
+header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+header h1 {
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+}
+
+.subtitle {
+    color: var(--text-muted);
+    font-size: 1rem;
+    margin-top: 0.3rem;
+}
+
+/* ============================================
+   LAYOUT
+   ============================================ */
+
+.computers {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2rem;
+}
+
+.computer-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: box-shadow 0.3s;
+}
+
+.computer-card:hover {
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.1);
+}
+
+.computer-label {
+    margin-top: 1.2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.computer-scene {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: calc(var(--px) * 2);
+}
+
+/* ============================================
+   LED BASE STYLES
+   ============================================ */
+
+.led {
+    width: calc(var(--px) * 3);
+    height: calc(var(--px) * 2);
+    border-radius: 50%;
+    transition: background 0.05s, box-shadow 0.05s;
+}
+
+.led[data-color="red"] {
+    background: var(--led-off-red);
+}
+.led[data-color="green"] {
+    background: var(--led-off-green);
+}
+.led[data-color="orange"] {
+    background: var(--led-off-orange);
+}
+
+.led.led--on[data-color="red"] {
+    background: var(--led-red);
+    box-shadow: 0 0 2px var(--led-red), 0 0 6px var(--led-red), 0 0 14px rgba(255, 32, 32, 0.5);
+}
+.led.led--on[data-color="green"] {
+    background: var(--led-green);
+    box-shadow: 0 0 2px var(--led-green), 0 0 6px var(--led-green), 0 0 14px rgba(32, 224, 64, 0.5);
+}
+.led.led--on[data-color="orange"] {
+    background: var(--led-orange);
+    box-shadow: 0 0 2px var(--led-orange), 0 0 6px var(--led-orange), 0 0 14px rgba(255, 160, 32, 0.5);
+}
+
+/* ============================================
+   COMMODORE 64
+   ============================================ */
+
+.c64-scene {
+    width: calc(var(--px) * 80);
+}
+
+/* Monitor */
+.c64-monitor {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.c64-monitor-bezel {
+    background: var(--c64-monitor-bezel);
+    border-radius: calc(var(--px) * 2);
+    padding: calc(var(--px) * 3);
+    border: calc(var(--px) * 1) solid #706658;
+}
+
+.c64-screen {
+    width: calc(var(--px) * 52);
+    height: calc(var(--px) * 32);
+    background: var(--c64-blue-screen);
+    border: calc(var(--px) * 1) solid #3030b0;
+    font-family: 'Courier New', monospace;
+    font-size: calc(var(--px) * 2.2);
+    color: var(--c64-blue-text);
+    padding: calc(var(--px) * 2);
+    overflow: hidden;
+    line-height: 1.5;
+    display: flex;
+    flex-direction: column;
+}
+
+.screen-line {
+    white-space: nowrap;
+    min-height: 1.5em;
+}
+
+.cursor {
+    display: inline-block;
+    animation: blink-cursor 0.5s step-end infinite;
+    background: var(--c64-blue-text);
+    color: var(--c64-blue-screen);
+    width: calc(var(--px) * 2);
+    text-align: center;
+}
+
+@keyframes blink-cursor {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+.c64-monitor-stand {
+    width: calc(var(--px) * 16);
+    height: calc(var(--px) * 4);
+    background: var(--c64-monitor-body);
+    border-radius: 0 0 calc(var(--px) * 1) calc(var(--px) * 1);
+    border: calc(var(--px) * 0.5) solid #a09888;
+    border-top: none;
+}
+
+/* C64 Body */
+.c64-body {
+    position: relative;
+    width: 100%;
+    background: linear-gradient(180deg, var(--c64-beige-light) 0%, var(--c64-beige) 30%, var(--c64-beige-dark) 100%);
+    border-radius: calc(var(--px) * 1.5);
+    padding: calc(var(--px) * 2) calc(var(--px) * 3);
+    padding-bottom: calc(var(--px) * 3);
+    border: calc(var(--px) * 0.5) solid #9a8a72;
+}
+
+.c64-logo-area {
+    margin-bottom: calc(var(--px) * 1.5);
+    display: flex;
+    align-items: center;
+    gap: calc(var(--px) * 1);
+}
+
+.c64-logo-text {
+    font-size: calc(var(--px) * 2);
+    font-weight: 700;
+    color: var(--c64-brown-keys);
+    text-transform: lowercase;
+    letter-spacing: 0.05em;
+    font-style: italic;
+}
+
+.c64-body > .led {
+    position: absolute;
+    top: calc(var(--px) * 2.5);
+    right: calc(var(--px) * 4);
+}
+
+.c64-keyboard {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--px) * 0.8);
+}
+
+.c64-key-row {
+    display: flex;
+    gap: calc(var(--px) * 0.6);
+}
+
+.c64-key-row .key {
+    width: calc(var(--px) * 4);
+    height: calc(var(--px) * 3.5);
+    background: var(--c64-brown-keys);
+    border-radius: calc(var(--px) * 0.4);
+    border: calc(var(--px) * 0.3) solid var(--c64-brown-key-face);
+    border-bottom-color: #5a4a36;
+}
+
+.c64-key-row .key.w15 {
+    width: calc(var(--px) * 6);
+}
+
+.c64-key-row .key.w2 {
+    width: calc(var(--px) * 7.5);
+}
+
+.c64-key-row .key.spacebar {
+    width: calc(var(--px) * 42);
+}
+
+.c64-fkeys {
+    position: absolute;
+    right: calc(var(--px) * 1.5);
+    top: calc(var(--px) * 7);
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--px) * 0.8);
+}
+
+.c64-fkeys .fkey {
+    width: calc(var(--px) * 5);
+    height: calc(var(--px) * 3.5);
+    background: var(--c64-brown-keys);
+    border-radius: calc(var(--px) * 0.4);
+    border: calc(var(--px) * 0.3) solid var(--c64-brown-key-face);
+    border-bottom-color: #5a4a36;
+}
+
+/* 1541 Disk Drive */
+.c64-1541 {
+    width: calc(var(--px) * 48);
+    background: linear-gradient(180deg, var(--1541-beige) 0%, #b0a088 100%);
+    border-radius: calc(var(--px) * 1);
+    border: calc(var(--px) * 0.5) solid #9a8a70;
+    padding: calc(var(--px) * 2);
+    position: relative;
+}
+
+.drive-top-label {
+    font-family: 'Courier New', monospace;
+    font-size: calc(var(--px) * 2);
+    color: #706050;
+    font-weight: 700;
+    margin-bottom: calc(var(--px) * 1);
+    text-align: center;
+}
+
+.drive-slot {
+    width: 80%;
+    height: calc(var(--px) * 1);
+    background: #605040;
+    margin: 0 auto calc(var(--px) * 2);
+    border-radius: calc(var(--px) * 0.3);
+}
+
+.drive-latch {
+    width: calc(var(--px) * 6);
+    height: calc(var(--px) * 3);
+    background: #908070;
+    border: calc(var(--px) * 0.3) solid #706050;
+    border-radius: calc(var(--px) * 0.3);
+    margin: 0 auto calc(var(--px) * 2);
+}
+
+.drive-bottom {
+    display: flex;
+    gap: calc(var(--px) * 3);
+    justify-content: center;
+    padding-top: calc(var(--px) * 1);
+    border-top: calc(var(--px) * 0.5) solid #9a8a70;
+}
+
+/* ============================================
+   AMIGA 500
+   ============================================ */
+
+.amiga-scene {
+    width: calc(var(--px) * 80);
+}
+
+/* Amiga Monitor */
+.amiga-monitor {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.amiga-monitor-bezel {
+    background: var(--amiga-monitor-body);
+    border-radius: calc(var(--px) * 2);
+    padding: calc(var(--px) * 3);
+    border: calc(var(--px) * 1) solid #a8a090;
+}
+
+.amiga-screen {
+    width: calc(var(--px) * 52);
+    height: calc(var(--px) * 32);
+    background: #5577bb;
+    border: calc(var(--px) * 1) solid #4060a0;
+    font-family: 'Courier New', monospace;
+    font-size: calc(var(--px) * 2);
+    overflow: hidden;
+    position: relative;
+}
+
+.wb-titlebar {
+    background: var(--amiga-wb-title);
+    color: #000;
+    padding: calc(var(--px) * 0.5) calc(var(--px) * 1);
+    font-size: calc(var(--px) * 1.8);
+    font-weight: 700;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.wb-close {
+    width: calc(var(--px) * 3);
+    height: calc(var(--px) * 2);
+    border: calc(var(--px) * 0.3) solid #000;
+    background: var(--amiga-wb-title);
+}
+
+.wb-icons {
+    display: flex;
+    gap: calc(var(--px) * 6);
+    padding: calc(var(--px) * 3);
+}
+
+.wb-icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: calc(var(--px) * 1);
+    color: #000;
+    font-size: calc(var(--px) * 1.6);
+}
+
+.wb-icon-img {
+    width: calc(var(--px) * 8);
+    height: calc(var(--px) * 6);
+    background: #ff8800;
+    border: calc(var(--px) * 0.5) solid #000;
+    border-radius: calc(var(--px) * 0.5);
+}
+
+.wb-icon-img.disk {
+    background: #0066cc;
+}
+
+.amiga-monitor-stand {
+    width: calc(var(--px) * 18);
+    height: calc(var(--px) * 4);
+    background: var(--amiga-monitor-body);
+    border-radius: 0 0 calc(var(--px) * 1) calc(var(--px) * 1);
+    border: calc(var(--px) * 0.5) solid #a8a090;
+    border-top: none;
+}
+
+/* Amiga Body */
+.amiga-body {
+    position: relative;
+    width: 100%;
+    background: linear-gradient(180deg, var(--amiga-beige-light) 0%, var(--amiga-beige) 40%, var(--amiga-beige-dark) 100%);
+    border-radius: calc(var(--px) * 1.5);
+    padding: calc(var(--px) * 2) calc(var(--px) * 3);
+    padding-bottom: calc(var(--px) * 3);
+    border: calc(var(--px) * 0.5) solid #a09888;
+}
+
+.amiga-logo-area {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--px) * 1.5);
+    margin-bottom: calc(var(--px) * 1.5);
+}
+
+.amiga-checkmark {
+    display: flex;
+    gap: calc(var(--px) * 0.3);
+}
+
+.ck {
+    width: calc(var(--px) * 1.2);
+    height: calc(var(--px) * 2.5);
+    display: block;
+    transform: skewX(-10deg);
+}
+
+.ck-red { background: #e84040; }
+.ck-white { background: #ffffff; }
+.ck-green { background: #40c040; }
+.ck-blue { background: #4040e8; }
+
+.amiga-logo-text {
+    font-size: calc(var(--px) * 2);
+    font-weight: 700;
+    color: #605848;
+    letter-spacing: 0.1em;
+}
+
+.amiga-disk-slot {
+    position: absolute;
+    right: calc(var(--px) * 4);
+    top: calc(var(--px) * 2);
+    width: calc(var(--px) * 14);
+    height: calc(var(--px) * 1);
+    background: #706050;
+    border-radius: calc(var(--px) * 0.2);
+}
+
+.amiga-keyboard {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--px) * 0.7);
+}
+
+.amiga-key-row {
+    display: flex;
+    gap: calc(var(--px) * 0.5);
+}
+
+.amiga-key-row .key {
+    width: calc(var(--px) * 3.8);
+    height: calc(var(--px) * 3.2);
+    background: var(--amiga-beige-dark);
+    border-radius: calc(var(--px) * 0.3);
+    border: calc(var(--px) * 0.3) solid var(--amiga-key-face);
+    border-bottom-color: #989080;
+}
+
+.amiga-key-row .key.w15 {
+    width: calc(var(--px) * 5.5);
+}
+
+.amiga-key-row .key.w2 {
+    width: calc(var(--px) * 7);
+}
+
+.amiga-key-row .key.spacebar {
+    width: calc(var(--px) * 32);
+}
+
+.amiga-key-row .key.amiga-key {
+    width: calc(var(--px) * 7);
+    background: #908878;
+}
+
+.spacebar-row {
+    justify-content: center;
+}
+
+.amiga-numpad {
+    position: absolute;
+    right: calc(var(--px) * 2);
+    bottom: calc(var(--px) * 6);
+    display: grid;
+    grid-template-columns: repeat(4, calc(var(--px) * 3.5));
+    gap: calc(var(--px) * 0.5);
+}
+
+.amiga-numpad .key {
+    width: calc(var(--px) * 3.5);
+    height: calc(var(--px) * 3);
+    background: var(--amiga-beige-dark);
+    border-radius: calc(var(--px) * 0.3);
+    border: calc(var(--px) * 0.3) solid var(--amiga-key-face);
+    border-bottom-color: #989080;
+}
+
+.amiga-leds {
+    position: absolute;
+    bottom: calc(var(--px) * 1);
+    right: calc(var(--px) * 3);
+    display: flex;
+    gap: calc(var(--px) * 2);
+}
+
+/* ============================================
+   ZX SPECTRUM
+   ============================================ */
+
+.spectrum-scene {
+    width: calc(var(--px) * 72);
+}
+
+/* Spectrum TV */
+.spectrum-tv {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.spectrum-tv-bezel {
+    background: var(--spec-tv-body);
+    border-radius: calc(var(--px) * 3);
+    padding: calc(var(--px) * 3);
+    border: calc(var(--px) * 1) solid var(--spec-tv-bezel);
+}
+
+.spectrum-screen {
+    width: calc(var(--px) * 48);
+    height: calc(var(--px) * 32);
+    background: var(--spec-screen-white);
+    border: calc(var(--px) * 1) solid #b0b0b0;
+    position: relative;
+    overflow: hidden;
+}
+
+.loading-border {
+    position: absolute;
+    inset: 0;
+    border: calc(var(--px) * 3) solid transparent;
+    animation: loading-stripes 0.15s step-end infinite;
+}
+
+@keyframes loading-stripes {
+    0%   { border-color: #cc0000; }
+    16%  { border-color: #00cccc; }
+    33%  { border-color: #cc0000; }
+    50%  { border-color: #00cccc; }
+    66%  { border-color: #cccc00; }
+    83%  { border-color: #0000cc; }
+    100% { border-color: #cc0000; }
+}
+
+.loading-content {
+    position: absolute;
+    inset: calc(var(--px) * 4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: calc(var(--px) * 2);
+    background: #d0d0d0;
+}
+
+.loading-text {
+    font-family: 'Courier New', monospace;
+    font-size: calc(var(--px) * 2);
+    color: #000;
+    font-weight: 700;
+}
+
+.loading-bar {
+    width: 80%;
+    height: calc(var(--px) * 2);
+    background: #000;
+    border: calc(var(--px) * 0.3) solid #000;
+}
+
+.loading-progress {
+    height: 100%;
+    width: 0%;
+    background: #cc0000;
+    animation: load-progress 8s ease-in-out infinite;
+}
+
+@keyframes load-progress {
+    0%   { width: 0%; background: #cc0000; }
+    40%  { width: 45%; background: #00cc00; }
+    70%  { width: 75%; background: #cccc00; }
+    90%  { width: 95%; background: #00cccc; }
+    100% { width: 100%; background: #00cc00; }
+}
+
+.loading-bytes {
+    font-family: 'Courier New', monospace;
+    font-size: calc(var(--px) * 1.6);
+    color: #000;
+}
+
+.spectrum-tv-stand {
+    display: flex;
+    gap: calc(var(--px) * 16);
+}
+
+.tv-leg {
+    width: calc(var(--px) * 3);
+    height: calc(var(--px) * 4);
+    background: var(--spec-tv-body);
+    border-radius: 0 0 calc(var(--px) * 1) calc(var(--px) * 1);
+}
+
+.tv-leg.left { transform: rotate(-8deg); }
+.tv-leg.right { transform: rotate(8deg); }
+
+/* Spectrum Body */
+.spectrum-body {
+    position: relative;
+    width: 100%;
+    background: linear-gradient(180deg, #222 0%, var(--spec-black) 100%);
+    border-radius: calc(var(--px) * 1) calc(var(--px) * 1) calc(var(--px) * 2) calc(var(--px) * 2);
+    padding: calc(var(--px) * 2) calc(var(--px) * 3);
+    padding-bottom: calc(var(--px) * 2.5);
+    border: calc(var(--px) * 0.5) solid #333;
+}
+
+.spectrum-label-area {
+    display: flex;
+    align-items: baseline;
+    gap: calc(var(--px) * 2);
+    margin-bottom: calc(var(--px) * 1.5);
+}
+
+.spectrum-brand {
+    font-size: calc(var(--px) * 2);
+    font-weight: 300;
+    color: #888;
+    font-style: italic;
+    letter-spacing: 0.05em;
+}
+
+.spectrum-model {
+    font-size: calc(var(--px) * 1.8);
+    font-weight: 700;
+    background: linear-gradient(90deg, #e84040, #e8a040, #e8e040, #40c040, #40c0c0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.spectrum-keyboard {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--px) * 0.8);
+}
+
+.spectrum-key-row {
+    display: flex;
+    gap: calc(var(--px) * 0.6);
+    justify-content: center;
+}
+
+.spectrum-key-row .key.rubber {
+    width: calc(var(--px) * 5.5);
+    height: calc(var(--px) * 3.5);
+    background: var(--spec-rubber);
+    border-radius: calc(var(--px) * 0.6);
+    border: calc(var(--px) * 0.3) solid var(--spec-rubber-face);
+    border-bottom-color: #2a2a2a;
+}
+
+.spectrum-key-row .key.rubber.w15 {
+    width: calc(var(--px) * 7.5);
+}
+
+.spectrum-key-row .key.rubber.spacebar-spec {
+    width: calc(var(--px) * 5.5);
+}
+
+.spectrum-rainbow {
+    position: absolute;
+    bottom: calc(var(--px) * 0.8);
+    right: calc(var(--px) * 3);
+    display: flex;
+    gap: 0;
+}
+
+.spectrum-rainbow .stripe {
+    width: calc(var(--px) * 3);
+    height: calc(var(--px) * 1.5);
+    display: block;
+}
+
+.stripe.red    { background: #e84040; }
+.stripe.orange { background: #e8a040; }
+.stripe.yellow { background: #e8e040; }
+.stripe.green  { background: #40c040; }
+.stripe.cyan   { background: #40c0c0; }
+
+.spectrum-leds {
+    display: flex;
+    gap: calc(var(--px) * 2);
+    margin-top: calc(var(--px) * 1.5);
+}
+
+.spectrum-cables {
+    position: absolute;
+    left: calc(var(--px) * 1);
+    top: calc(var(--px) * 1);
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--px) * 1);
+}
+
+.cable {
+    width: calc(var(--px) * 10);
+    height: calc(var(--px) * 0.5);
+    background: #444;
+    border-radius: calc(var(--px) * 0.3);
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+
+footer {
+    text-align: center;
+    margin-top: 3rem;
+    padding: 1rem;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-style: italic;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 900px) {
+    :root {
+        --px: 3.2px;
+    }
+
+    header h1 {
+        font-size: 1.8rem;
+    }
+
+    .computers {
+        gap: 1.5rem;
+    }
+}
+
+@media (max-width: 600px) {
+    :root {
+        --px: 2.8px;
+    }
+
+    .container {
+        padding: 1rem 0.5rem;
+    }
+
+    header h1 {
+        font-size: 1.5rem;
+    }
+
+    .computers {
+        flex-direction: column;
+        align-items: center;
+        gap: 1.2rem;
+    }
+
+    .computer-card {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 400px) {
+    :root {
+        --px: 2.2px;
+    }
+}
